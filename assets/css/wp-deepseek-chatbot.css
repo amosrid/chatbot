@@ -1,0 +1,493 @@
+/**
+ * WP DeepSeek Chatbot Styles - Elegant Edition
+ */
+
+/* Custom properties for elegant theme */
+:root {
+    --wp-deepseek-dark: #2c2c2c;
+    --wp-deepseek-accent: #9c8262; /* Elegant gold/bronze */
+    --wp-deepseek-light: #f4f4f4;
+    --wp-deepseek-text: #333333;
+    --wp-deepseek-text-light: #ffffff;
+    --wp-deepseek-border: #e0e0e0;
+    --wp-deepseek-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --wp-deepseek-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chatbot container */
+.wp-deepseek-chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99999; /* Increased z-index to ensure it's above everything */
+    font-family: var(--wp-deepseek-font-family, 'Montserrat', 'Helvetica Neue', sans-serif);
+}
+
+/* Chatbot toggle button - Revised for H1 text */
+.wp-deepseek-chatbot-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--wp-deepseek-primary-color, var(--wp-deepseek-accent));
+    box-shadow: var(--wp-deepseek-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--wp-deepseek-transition);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    z-index: 99999; /* Added z-index to ensure toggle is above other elements */
+}
+
+/* Style for the "AI" text in H1 */
+.wp-deepseek-chatbot-toggle h1 {
+    color: var(--wp-deepseek-text-light);
+    font-size: 22px;
+    margin: 0;
+    padding: 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: var(--wp-deepseek-transition);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+}
+
+.wp-deepseek-chatbot-toggle:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.wp-deepseek-chatbot-toggle:hover h1 {
+    transform: scale(1.1);
+}
+
+/* Chatbot widget - FIXED to appear above header */
+.wp-deepseek-chatbot-widget {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    max-width: 90vw;
+    height: 500px;
+    max-height: 80vh;
+    border-radius: 16px;
+    background-color: #fff;
+    box-shadow: var(--wp-deepseek-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: var(--wp-deepseek-transition);
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    pointer-events: none;
+    border: 1px solid var(--wp-deepseek-border);
+    z-index: 100000; /* Much higher z-index to ensure it appears above headers */
+}
+
+/* Fix for specific ID selector to ensure priority */
+#wp-deepseek-chatbot-widget {
+    z-index: 100000 !important; /* Use !important to override any other styles */
+    position: relative; /* Ensure proper stacking context */
+}
+
+.wp-deepseek-chatbot-widget.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: all;
+}
+
+/* Chatbot header */
+.wp-deepseek-chatbot-header {
+    background-color: var(--wp-deepseek-primary-color, var(--wp-deepseek-dark));
+    color: var(--wp-deepseek-text-light);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative; /* Added to create stacking context */
+    z-index: 100001; /* Higher than the widget to ensure it's on top of content */
+}
+
+.wp-deepseek-chatbot-close {
+    cursor: pointer;
+    font-size: 22px;
+    opacity: 0.8;
+    transition: var(--wp-deepseek-transition);
+    line-height: 1;
+}
+
+.wp-deepseek-chatbot-close:hover {
+    opacity: 1;
+    transform: rotate(90deg);
+}
+
+/* Chatbot messages container */
+.wp-deepseek-chatbot-messages {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background-color: #ffffff;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.01) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 0, 0, 0.01) 1px, transparent 1px);
+    background-size: 20px 20px;
+    position: relative; /* Added for proper stacking context */
+    z-index: 99998; /* Lower than header but still high */
+}
+
+/* Chatbot message */
+.wp-deepseek-chatbot-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: message-fade-in 0.3s ease-out forwards;
+}
+
+@keyframes message-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wp-deepseek-chatbot-message-bot {
+    align-self: flex-start;
+}
+
+.wp-deepseek-chatbot-message-user {
+    align-self: flex-end;
+}
+
+.wp-deepseek-chatbot-message-content {
+    padding: 12px 18px;
+    border-radius: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    letter-spacing: 0.2px;
+}
+
+.wp-deepseek-chatbot-message-bot .wp-deepseek-chatbot-message-content {
+    background-color: var(--wp-deepseek-secondary-color, var(--wp-deepseek-light));
+    color: var(--wp-deepseek-text);
+    border-bottom-left-radius: 4px;
+    border-left: 3px solid var(--wp-deepseek-accent);
+}
+
+.wp-deepseek-chatbot-message-user .wp-deepseek-chatbot-message-content {
+    background-color: var(--wp-deepseek-primary-color, var(--wp-deepseek-dark));
+    color: var(--wp-deepseek-text-light);
+    border-bottom-right-radius: 4px;
+}
+
+/* Chatbot input area */
+.wp-deepseek-chatbot-input-container {
+    padding: 18px 20px;
+    border-top: 1px solid var(--wp-deepseek-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: #ffffff;
+    position: relative; /* Added for proper stacking */
+    z-index: 99999; /* High enough to be above content */
+}
+
+.wp-deepseek-chatbot-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid var(--wp-deepseek-border);
+    border-radius: 24px;
+    outline: none;
+    font-size: 14px;
+    transition: var(--wp-deepseek-transition);
+    background-color: var(--wp-deepseek-light);
+    font-family: inherit;
+}
+
+.wp-deepseek-chatbot-input:focus {
+    border-color: var(--wp-deepseek-accent);
+    box-shadow: 0 0 0 3px rgba(156, 130, 98, 0.1);
+}
+
+.wp-deepseek-chatbot-submit {
+    background-color: var(--wp-deepseek-primary-color, var(--wp-deepseek-accent));
+    border: none;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--wp-deepseek-transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wp-deepseek-chatbot-submit:hover {
+    background-color: var(--wp-deepseek-primary-color-dark, #876e52);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wp-deepseek-chatbot-submit svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--wp-deepseek-text-light);
+}
+
+/* Typing indicator */
+.wp-deepseek-chatbot-typing {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    background-color: var(--wp-deepseek-secondary-color, var(--wp-deepseek-light));
+    border-radius: 20px;
+    max-width: 80px;
+    align-self: flex-start;
+    margin-top: 5px;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.wp-deepseek-chatbot-typing-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--wp-deepseek-accent);
+    border-radius: 50%;
+    margin: 0 3px;
+    display: inline-block;
+    animation: typing-dot 1.4s infinite ease-in-out both;
+}
+
+.wp-deepseek-chatbot-typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.wp-deepseek-chatbot-typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing-dot {
+    0%, 80%, 100% { 
+        transform: scale(0.7);
+        opacity: 0.6;
+    }
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Responsive styles */
+@media screen and (max-width: 480px) {
+    .wp-deepseek-chatbot-widget {
+        bottom: 70px;
+        width: calc(100vw - 40px);
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
+    }
+    
+    .wp-deepseek-chatbot-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .wp-deepseek-chatbot-toggle h1 {
+        font-size: 18px;
+    }
+    
+    .wp-deepseek-chatbot-message {
+        max-width: 90%;
+    }
+}
+
+/* Conversation starters */
+.wp-deepseek-chatbot-starters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.wp-deepseek-chatbot-starter {
+    background-color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--wp-deepseek-transition);
+    border: 1px solid var(--wp-deepseek-border);
+    color: var(--wp-deepseek-text);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.wp-deepseek-chatbot-starter:hover {
+    background-color: var(--wp-deepseek-light);
+    border-color: var(--wp-deepseek-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Links in chat messages */
+.wp-deepseek-chatbot-message-content a {
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    transition: var(--wp-deepseek-transition);
+}
+
+.wp-deepseek-chatbot-message-bot .wp-deepseek-chatbot-message-content a {
+    color: var(--wp-deepseek-accent);
+    border-bottom: 1px dotted var(--wp-deepseek-accent);
+}
+
+.wp-deepseek-chatbot-message-bot .wp-deepseek-chatbot-message-content a:hover {
+    opacity: 0.8;
+    border-bottom-style: solid;
+}
+
+.wp-deepseek-chatbot-message-user .wp-deepseek-chatbot-message-content a {
+    color: rgba(255, 255, 255, 0.9);
+    border-bottom: 1px dotted rgba(255, 255, 255, 0.6);
+}
+
+.wp-deepseek-chatbot-message-user .wp-deepseek-chatbot-message-content a:hover {
+    color: #ffffff;
+    border-bottom-style: solid;
+}
+
+.wp-deepseek-chatbot-thinking {
+    padding: 12px;
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    font-size: 13px;
+}
+
+/* Custom scrollbar for message container */
+.wp-deepseek-chatbot-messages::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.wp-deepseek-chatbot-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.wp-deepseek-chatbot-messages::-webkit-scrollbar-thumb {
+    background: #d1d1d1;
+    border-radius: 3px;
+}
+
+.wp-deepseek-chatbot-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--wp-deepseek-accent);
+}
+
+/* Styling untuk button reset percakapan */
+.wp-deepseek-chatbot-reset {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    text-align: center;
+    padding: 5px;
+    margin-top: 5px;
+    text-decoration: underline;
+    transition: var(--wp-deepseek-transition);
+}
+
+.wp-deepseek-chatbot-reset:hover {
+    color: var(--wp-deepseek-primary-color);
+}
+
+/* Indikator untuk menunjukkan chatbot mengingat konteks */
+.wp-deepseek-chatbot-context-active {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+    padding: 3px 8px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    display: inline-block;
+    margin: 0 auto;
+}
+/* Enhanced formatting for chatbot messages */
+.wp-deepseek-chatbot-message-content {
+    line-height: 1.6;
+}
+
+.wp-deepseek-chatbot-message-content h2 {
+    font-size: 18px;
+    margin: 15px 0 8px;
+    font-weight: 600;
+    color: var(--wp-deepseek-dark);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 5px;
+}
+
+.wp-deepseek-chatbot-message-content h3 {
+    font-size: 16px;
+    margin: 12px 0 6px;
+    font-weight: 600;
+    color: var(--wp-deepseek-dark);
+}
+
+.wp-deepseek-chatbot-message-content strong {
+    font-weight: 700;
+}
+
+.wp-deepseek-chatbot-message-content em {
+    font-style: italic;
+}
+
+.wp-deepseek-chatbot-message-content .wp-deepseek-list-item {
+    display: block;
+    padding: 3px 0 3px 18px;
+    position: relative;
+    text-indent: -18px;
+}
+
+.wp-deepseek-chatbot-message-content .wp-deepseek-list-number {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.wp-deepseek-chatbot-message-content hr {
+    margin: 10px 0;
+    border: 0;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* Make links in bot messages stand out */
+.wp-deepseek-chatbot-message-bot .wp-deepseek-chatbot-message-content a {
+    color: var(--wp-deepseek-primary-color);
+    font-weight: 500;
+    text-decoration: underline;
+    transition: all 0.2s ease;
+}
+
+.wp-deepseek-chatbot-message-bot .wp-deepseek-chatbot-message-content a:hover {
+    opacity: 0.8;
+}
+
+/* Add spacing between paragraphs */
+.wp-deepseek-chatbot-message-content br + br {
+    display: block;
+    content: "";
+    margin-top: 0.8em;
+}
