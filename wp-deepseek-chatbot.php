@@ -87,7 +87,7 @@ class WP_DeepSeek_Chatbot {
         require_once $this->plugin_dir . 'includes/class-wp-deepseek-api.php';
         
         // Include Search Class
-        require_once $this->plugin_dir . 'includes/class-wp-deepseek-search.php';
+        // require_once $this->plugin_dir . 'includes/class-wp-deepseek-search.php';
         
     }
 
@@ -252,58 +252,46 @@ class WP_DeepSeek_Chatbot {
      * Handle chat request AJAX
      */
     
-public function handle_chat_request() {
-    // Verify nonce
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wp_deepseek_chatbot_nonce')) {
-        wp_send_json_error(array('message' => __('Security check failed.', 'wp-deepseek-chatbot')));
-    }
-
-    // Get user query
-    $query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
-
-    if (empty($query)) {
-        wp_send_json_error(array('message' => __('Please provide a valid query.', 'wp-deepseek-chatbot')));
-    }
+     public function handle_chat_request() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wp_deepseek_chatbot_nonce')) {
+            wp_send_json_error(array('message' => __('Security check failed.', 'wp-deepseek-chatbot')));
+        }
     
-    // Save user message to conversation history
-    $_SESSION['wp_deepseek_conversation'][] = array(
-        'role' => 'user',
-        'content' => $query
-    );
-
-    // Get conversation history (limit to last 5 messages for performance)
-    $conversation_history = array_slice($_SESSION['wp_deepseek_conversation'], -10);
+        // Get user query
+        $query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
     
-    // Initialize Search class
-    $search = new WP_DeepSeek_Search();
+        if (empty($query)) {
+            wp_send_json_error(array('message' => __('Please provide a valid query.', 'wp-deepseek-chatbot')));
+        }
+        
+        // Save user message to conversation history
+        $_SESSION['wp_deepseek_conversation'][] = array(
+            'role' => 'user',
+            'content' => $query
+        );
     
-    // Search WordPress content first
-    $search_results = $search->search($query);
-    
-    // Initialize API class with conversation history
-    $api = new WP_DeepSeek_API();
-    
-    if (!empty($search_results)) {
-        // If we have WordPress results, use them to enrich the response
-        $response = $api->get_response($query, $search_results, $conversation_history);
-        $source = 'combined';
-    } else {
-        // If no WordPress results, use DeepSeek AI directly
+        // Get conversation history (limit to last 10 messages for performance)
+        $conversation_history = array_slice($_SESSION['wp_deepseek_conversation'], -10);
+        
+        // Initialize API class with conversation history
+        $api = new WP_DeepSeek_API();
+        
+        // Use DeepSeek AI directly without WordPress search
         $response = $api->get_response($query, array(), $conversation_history);
-        $source = 'ai';
+        
+        // Save bot response to conversation history
+        $_SESSION['wp_deepseek_conversation'][] = array(
+            'role' => 'assistant',
+            'content' => $response
+        );
+        
+        wp_send_json_success(array(
+            'message' => $response,
+            'source' => 'ai',
+        ));
     }
     
-    // Save bot response to conversation history
-    $_SESSION['wp_deepseek_conversation'][] = array(
-        'role' => 'assistant',
-        'content' => $response
-    );
-    
-    wp_send_json_success(array(
-        'message' => $response,
-        'source' => $source,
-    ));
-}
 public function reset_chat() {
     // Verify nonce
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wp_deepseek_chatbot_nonce')) {
