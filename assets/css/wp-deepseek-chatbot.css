@@ -491,3 +491,174 @@
     content: "";
     margin-top: 0.8em;
 }
+/**
+ * Floating Action Button (FAB) Menu Styles - Clean Version
+ */
+
+/* ========== FAB Container ========== */
+.wp-deepseek-fab-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99998;
+    font-family: var(--wp-deepseek-font-family, 'Arial', sans-serif);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+/* ========== FAB Toggle Button ========== */
+.wp-deepseek-fab-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--wp-deepseek-primary-color, #4a90e2);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: absolute; /* Ubah dari relative ke absolute */
+    bottom: 0; /* Tambahkan ini untuk posisi di bawah */
+    right: 0; /* Tambahkan ini untuk posisi di kanan */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 99999;
+}
+
+.wp-deepseek-fab-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.wp-deepseek-fab-toggle i {
+    color: #fff;
+    font-size: 24px;
+    transition: transform 0.3s ease;
+}
+
+.wp-deepseek-fab-toggle.active i {
+    transform: rotate(45deg);
+}
+
+/* ========== FAB Menu ========== */
+.wp-deepseek-fab-menu {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 240px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 0;
+    overflow: hidden;
+    z-index: 99997;
+}
+
+.wp-deepseek-fab-menu.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    max-height: 500px;
+    overflow: visible;
+}
+
+/* ========== FAB Menu Items ========== */
+.wp-deepseek-fab-items {
+    padding: 10px;
+}
+
+.wp-deepseek-fab-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+    color: var(--wp-deepseek-text, #333);
+}
+
+.wp-deepseek-fab-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.wp-deepseek-fab-item:last-child {
+    margin-bottom: 0;
+}
+
+.wp-deepseek-fab-item-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--wp-deepseek-primary-color, #4a90e2);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.wp-deepseek-fab-item-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.wp-deepseek-fab-item-text {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wp-deepseek-fab-chat-option {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 10px;
+}
+
+/* ========== Chatbot Widget in FAB Container ========== */
+.wp-deepseek-fab-container .wp-deepseek-chatbot-widget {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 350px;
+    max-width: 90vw;
+    height: 500px;
+    max-height: 80vh;
+    border-radius: 16px;
+    background-color: #fff;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    z-index: 99996;
+}
+
+/* Hide regular chatbot container when FAB is enabled */
+.wp-deepseek-fab-menu-enabled .wp-deepseek-chatbot-container {
+    display: none;
+}
+
+/* ========== Media Queries ========== */
+@media screen and (max-width: 480px) {
+    .wp-deepseek-fab-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .wp-deepseek-fab-menu {
+        width: 220px;
+        bottom: 60px;
+    }
+    
+    .wp-deepseek-fab-container .wp-deepseek-chatbot-widget {
+        width: calc(100vw - 40px);
+        height: calc(100vh - 120px);
+        max-height: calc(100vh - 120px);
+        bottom: 70px;
+    }
+}

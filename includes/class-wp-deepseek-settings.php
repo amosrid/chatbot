@@ -21,7 +21,20 @@ class WP_DeepSeek_Settings {
     public function __construct() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts')); // Tambahkan baris ini
     }
+    /**
+ * Enqueue admin scripts and styles
+ */
+public function enqueue_admin_scripts($hook) {
+    // Only load on our settings page
+    if ('toplevel_page_wp-deepseek-chatbot-settings' !== $hook) {
+        return;
+    }
+    
+    // Enqueue WordPress media scripts
+    wp_enqueue_media();
+}
 
     /**
      * Add admin menu
@@ -188,6 +201,33 @@ class WP_DeepSeek_Settings {
             'wp_deepseek_chatbot_settings',
             'wp_deepseek_chatbot_training'
         );
+// Add this after the last add_settings_section() call in register_settings() method
+
+// FAB Menu Settings Section
+add_settings_section(
+    'wp_deepseek_chatbot_fab_menu',
+    __('Floating Action Button Menu', 'wp-deepseek-chatbot'),
+    array($this, 'fab_menu_section_callback'),
+    'wp_deepseek_chatbot_settings'
+);
+
+// Enable FAB Menu
+add_settings_field(
+    'enable_fab_menu',
+    __('Enable FAB Menu', 'wp-deepseek-chatbot'),
+    array($this, 'enable_fab_menu_callback'),
+    'wp_deepseek_chatbot_settings',
+    'wp_deepseek_chatbot_fab_menu'
+);
+
+// FAB Menu Items
+add_settings_field(
+    'fab_menu_items',
+    __('Menu Items', 'wp-deepseek-chatbot'),
+    array($this, 'fab_menu_items_callback'),
+    'wp_deepseek_chatbot_settings',
+    'wp_deepseek_chatbot_fab_menu'
+);
     }
 
     /**
@@ -278,7 +318,27 @@ class WP_DeepSeek_Settings {
         } else {
             $output['knowledge_base'] = array();
         }
+// Add this to the sanitize_settings method, before the return $output; line
 
+// Enable FAB Menu
+$output['enable_fab_menu'] = isset($input['enable_fab_menu']) ? 1 : 0;
+
+// FAB Menu Items
+if (isset($input['fab_menu_items']) && is_array($input['fab_menu_items'])) {
+    $output['fab_menu_items'] = array();
+    foreach ($input['fab_menu_items'] as $item) {
+        if (!empty($item['name']) || !empty($item['whatsapp_number'])) {
+            $output['fab_menu_items'][] = array(
+                'name' => sanitize_text_field($item['name']),
+                'icon' => esc_url_raw($item['icon']),
+                'whatsapp_number' => preg_replace('/[^0-9]/', '', $item['whatsapp_number']),
+                'whatsapp_message' => sanitize_textarea_field($item['whatsapp_message']),
+            );
+        }
+    }
+} else {
+    $output['fab_menu_items'] = array();
+}
         return $output;
     }
 
@@ -722,6 +782,259 @@ class WP_DeepSeek_Settings {
         </script>
         <?php
     }
+    // Add these methods at the end of the class, before the closing bracket
+    
+    /**
+     * FAB menu section callback
+     */
+    public function fab_menu_section_callback() {
+        echo '<p>' . esc_html__('Configure the Floating Action Button menu options.', 'wp-deepseek-chatbot') . '</p>';
+    }
+    
+    /**
+     * Enable FAB menu callback
+     */
+    public function enable_fab_menu_callback() {
+        $settings = get_option('wp_deepseek_chatbot_settings');
+        $enable_fab_menu = isset($settings['enable_fab_menu']) ? $settings['enable_fab_menu'] : 0;
+        ?>
+        <input type="checkbox" id="enable_fab_menu" name="wp_deepseek_chatbot_settings[enable_fab_menu]" value="1" <?php checked(1, $enable_fab_menu); ?>>
+        <p class="description"><?php esc_html_e('Enable the expandable Floating Action Button menu.', 'wp-deepseek-chatbot'); ?></p>
+        <?php
+    }
+    
+    /**
+     * FAB menu items callback
+     */
+    public function fab_menu_items_callback() {
+        $settings = get_option('wp_deepseek_chatbot_settings');
+        $fab_menu_items = isset($settings['fab_menu_items']) ? $settings['fab_menu_items'] : array(
+            array(
+                'name' => '',
+                'icon' => '',
+                'whatsapp_number' => '',
+                'whatsapp_message' => ''
+            )
+        );
+        ?>
+        <div id="fab-menu-items-container">
+            <?php foreach ($fab_menu_items as $index => $item) : ?>
+                <div class="fab-menu-item">
+                    <h4><?php esc_html_e('Menu Item', 'wp-deepseek-chatbot'); ?> #<?php echo esc_html($index + 1); ?></h4>
+                    
+                    <div class="fab-menu-item-field">
+                        <label><?php esc_html_e('Service Name', 'wp-deepseek-chatbot'); ?></label>
+                        <input type="text" name="wp_deepseek_chatbot_settings[fab_menu_items][<?php echo esc_attr($index); ?>][name]" 
+                               value="<?php echo esc_attr($item['name']); ?>" class="regular-text"
+                               placeholder="<?php esc_attr_e('e.g. Konsultasi Booking Service', 'wp-deepseek-chatbot'); ?>">
+                    </div>
+                    
+                    <div class="fab-menu-item-field">
+                        <label><?php esc_html_e('Icon', 'wp-deepseek-chatbot'); ?></label>
+                        <div class="fab-menu-icon-upload">
+                            <input type="hidden" name="wp_deepseek_chatbot_settings[fab_menu_items][<?php echo esc_attr($index); ?>][icon]" 
+                                   value="<?php echo esc_attr($item['icon']); ?>" class="fab-menu-icon-url">
+                            <div class="fab-menu-icon-preview">
+                                <?php if (!empty($item['icon'])) : ?>
+                                    <img src="<?php echo esc_url($item['icon']); ?>" alt="Menu Icon">
+                                <?php else : ?>
+                                    <span><?php esc_html_e('No icon selected', 'wp-deepseek-chatbot'); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" class="button upload-fab-icon"><?php esc_html_e('Upload Icon', 'wp-deepseek-chatbot'); ?></button>
+                            <button type="button" class="button remove-fab-icon" <?php echo empty($item['icon']) ? 'style="display:none;"' : ''; ?>><?php esc_html_e('Remove', 'wp-deepseek-chatbot'); ?></button>
+                        </div>
+                    </div>
+                    
+                    <div class="fab-menu-item-field">
+                        <label><?php esc_html_e('WhatsApp Number', 'wp-deepseek-chatbot'); ?></label>
+                        <input type="text" name="wp_deepseek_chatbot_settings[fab_menu_items][<?php echo esc_attr($index); ?>][whatsapp_number]" 
+                               value="<?php echo esc_attr($item['whatsapp_number']); ?>" class="regular-text"
+                               placeholder="<?php esc_attr_e('e.g. 6281234567890 (no + or spaces)', 'wp-deepseek-chatbot'); ?>">
+                    </div>
+                    
+                    <div class="fab-menu-item-field">
+                        <label><?php esc_html_e('Default WhatsApp Message', 'wp-deepseek-chatbot'); ?></label>
+                        <textarea name="wp_deepseek_chatbot_settings[fab_menu_items][<?php echo esc_attr($index); ?>][whatsapp_message]" 
+                                  rows="3" class="large-text"
+                                  placeholder="<?php esc_attr_e('e.g. Halo, saya ingin konsultasi booking service.', 'wp-deepseek-chatbot'); ?>"><?php echo esc_textarea($item['whatsapp_message']); ?></textarea>
+                    </div>
+                    
+                    <div class="fab-menu-item-actions">
+                        <button type="button" class="button remove-fab-menu-item" <?php echo (count($fab_menu_items) <= 1) ? 'style="display:none;"' : ''; ?>><?php esc_html_e('Remove Item', 'wp-deepseek-chatbot'); ?></button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        
+        <button type="button" class="button add-fab-menu-item"><?php esc_html_e('Add Menu Item', 'wp-deepseek-chatbot'); ?></button>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            // Add menu item
+            $('.add-fab-menu-item').on('click', function() {
+                var index = $('.fab-menu-item').length;
+                var template = `
+                    <div class="fab-menu-item">
+                        <h4><?php esc_html_e('Menu Item', 'wp-deepseek-chatbot'); ?> #${index + 1}</h4>
+                        
+                        <div class="fab-menu-item-field">
+                            <label><?php esc_html_e('Service Name', 'wp-deepseek-chatbot'); ?></label>
+                            <input type="text" name="wp_deepseek_chatbot_settings[fab_menu_items][${index}][name]" 
+                                   value="" class="regular-text"
+                                   placeholder="<?php esc_attr_e('e.g. Konsultasi Booking Service', 'wp-deepseek-chatbot'); ?>">
+                        </div>
+                        
+                        <div class="fab-menu-item-field">
+                            <label><?php esc_html_e('Icon', 'wp-deepseek-chatbot'); ?></label>
+                            <div class="fab-menu-icon-upload">
+                                <input type="hidden" name="wp_deepseek_chatbot_settings[fab_menu_items][${index}][icon]" 
+                                       value="" class="fab-menu-icon-url">
+                                <div class="fab-menu-icon-preview">
+                                    <span><?php esc_html_e('No icon selected', 'wp-deepseek-chatbot'); ?></span>
+                                </div>
+                                <button type="button" class="button upload-fab-icon"><?php esc_html_e('Upload Icon', 'wp-deepseek-chatbot'); ?></button>
+                                <button type="button" class="button remove-fab-icon" style="display:none;"><?php esc_html_e('Remove', 'wp-deepseek-chatbot'); ?></button>
+                            </div>
+                        </div>
+                        
+                        <div class="fab-menu-item-field">
+                            <label><?php esc_html_e('WhatsApp Number', 'wp-deepseek-chatbot'); ?></label>
+                            <input type="text" name="wp_deepseek_chatbot_settings[fab_menu_items][${index}][whatsapp_number]" 
+                                   value="" class="regular-text"
+                                   placeholder="<?php esc_attr_e('e.g. 6281234567890 (no + or spaces)', 'wp-deepseek-chatbot'); ?>">
+                        </div>
+                        
+                        <div class="fab-menu-item-field">
+                            <label><?php esc_html_e('Default WhatsApp Message', 'wp-deepseek-chatbot'); ?></label>
+                            <textarea name="wp_deepseek_chatbot_settings[fab_menu_items][${index}][whatsapp_message]" 
+                                      rows="3" class="large-text"
+                                      placeholder="<?php esc_attr_e('e.g. Halo, saya ingin konsultasi booking service.', 'wp-deepseek-chatbot'); ?>"></textarea>
+                        </div>
+                        
+                        <div class="fab-menu-item-actions">
+                            <button type="button" class="button remove-fab-menu-item"><?php esc_html_e('Remove Item', 'wp-deepseek-chatbot'); ?></button>
+                        </div>
+                    </div>
+                `;
+                
+                $('#fab-menu-items-container').append(template);
+                $('.remove-fab-menu-item').show();
+            });
+            
+            // Remove menu item
+            $(document).on('click', '.remove-fab-menu-item', function() {
+                $(this).closest('.fab-menu-item').remove();
+                
+                // Update item numbers
+                $('.fab-menu-item').each(function(idx) {
+                    $(this).find('h4').text('<?php esc_html_e('Menu Item', 'wp-deepseek-chatbot'); ?> #' + (idx + 1));
+                    $(this).find('input, textarea, .fab-menu-icon-url').each(function() {
+                        var name = $(this).attr('name');
+                        if (name) {
+                            name = name.replace(/\[\d+\]/, '[' + idx + ']');
+                            $(this).attr('name', name);
+                        }
+                    });
+                });
+                
+                // Hide remove button if only one item remains
+                if ($('.fab-menu-item').length <= 1) {
+                    $('.remove-fab-menu-item').hide();
+                }
+            });
+            
+            // Handle icon upload
+            $(document).on('click', '.upload-fab-icon', function(e) {
+                e.preventDefault();
+                
+                var button = $(this);
+                var container = button.closest('.fab-menu-icon-upload');
+                var preview = container.find('.fab-menu-icon-preview');
+                var urlInput = container.find('.fab-menu-icon-url');
+                var removeButton = container.find('.remove-fab-icon');
+                
+                var frame = wp.media({
+                    title: '<?php esc_html_e('Select or Upload Menu Icon', 'wp-deepseek-chatbot'); ?>',
+                    button: {
+                        text: '<?php esc_html_e('Use this icon', 'wp-deepseek-chatbot'); ?>'
+                    },
+                    multiple: false
+                });
+                
+                frame.on('select', function() {
+                    var attachment = frame.state().get('selection').first().toJSON();
+                    urlInput.val(attachment.url);
+                    preview.html('<img src="' + attachment.url + '" alt="Menu Icon">');
+                    removeButton.show();
+                });
+                
+                frame.open();
+            });
+            
+            // Handle icon removal
+            $(document).on('click', '.remove-fab-icon', function(e) {
+                e.preventDefault();
+                
+                var button = $(this);
+                var container = button.closest('.fab-menu-icon-upload');
+                var preview = container.find('.fab-menu-icon-preview');
+                var urlInput = container.find('.fab-menu-icon-url');
+                
+                urlInput.val('');
+                preview.html('<span><?php esc_html_e('No icon selected', 'wp-deepseek-chatbot'); ?></span>');
+                button.hide();
+            });
+        });
+        </script>
+        
+        <style>
+        .fab-menu-item {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .fab-menu-item h4 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .fab-menu-item-field {
+            margin-bottom: 15px;
+        }
+        .fab-menu-item-field label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .fab-menu-icon-preview {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background: #eee;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 60px;
+            font-size: 12px;
+            color: #888;
+        }
+        .fab-menu-icon-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            vertical-align: middle;
+        }
+        .fab-menu-item-actions {
+            margin-top: 15px;
+            text-align: right;
+        }
+        </style>
+        <?php
+    }
+    
 }
 
 // Initialize settings

@@ -5,10 +5,7 @@
     'use strict';
 
     // Variables
-    var chatbotWidget = $('#wp-deepseek-chatbot-widget'),
-        chatbotMessages = $('#wp-deepseek-chatbot-messages'),
-        chatbotInput = $('#wp-deepseek-chatbot-input'),
-        isProcessing = false;
+    var chatbotWidget, chatbotMessages, chatbotInput, isProcessing = false;
 
     // Add message to the chat
     function addMessage(message, isUser) {
@@ -157,12 +154,61 @@
         });
     }
 
+    // FAB Menu Functions
+    function toggleFabMenu() {
+        $('.wp-deepseek-fab-toggle').toggleClass('active');
+        $('.wp-deepseek-fab-menu').toggleClass('active');
+    }
+
+    function initFabMenu() {
+        // Toggle menu when FAB is clicked
+        $('.wp-deepseek-fab-toggle').on('click', function(e) {
+            e.preventDefault();
+            toggleFabMenu();
+        });
+        
+        // Close menu when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.wp-deepseek-fab-container').length && 
+                !$(e.target).closest('#wp-deepseek-chatbot-widget').length) {
+                $('.wp-deepseek-fab-toggle').removeClass('active');
+                $('.wp-deepseek-fab-menu').removeClass('active');
+            }
+        });
+        
+        // Prevent clicks inside menu from closing it
+        $('.wp-deepseek-fab-menu').on('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Handle chatbot toggle from FAB menu
+        $('#wp-deepseek-toggle-chatbot').on('click', function(e) {
+            e.preventDefault();
+            $('#wp-deepseek-chatbot-widget').addClass('active');
+            $('#wp-deepseek-chatbot-input').focus();
+            
+            // Close the FAB menu
+            $('.wp-deepseek-fab-toggle').removeClass('active');
+            $('.wp-deepseek-fab-menu').removeClass('active');
+        });
+        
+        // Close chatbot
+        $('.wp-deepseek-chatbot-close').on('click', function() {
+            $('#wp-deepseek-chatbot-widget').removeClass('active');
+        });
+    }
+
     // Initialize
     function init() {
         try {
+            // Initialize DOM references
+            chatbotWidget = $('#wp-deepseek-chatbot-widget');
+            chatbotMessages = $('#wp-deepseek-chatbot-messages');
+            chatbotInput = $('#wp-deepseek-chatbot-input');
+            
             applyThemeColors();
             
-            // Event handlers
+            // Event handlers for chatbot
             $('#wp-deepseek-chatbot-toggle').on('click', function() {
                 chatbotWidget.toggleClass('active');
                 if (chatbotWidget.hasClass('active')) chatbotInput.focus();
@@ -182,11 +228,17 @@
             $('#wp-deepseek-chatbot-submit').on('click', sendMessage);
             $('#wp-deepseek-reset-chat').on('click', resetChat);
             
+            // Initialize FAB menu if enabled
+            if (wpDeepseekChatbot.fab_enabled) {
+                initFabMenu();
+            }
+            
         } catch (error) {
             console.error('Error initializing chatbot:', error);
         }
     }
 
+    // Initialize everything when document is ready
     $(document).ready(init);
 
 })(jQuery);
